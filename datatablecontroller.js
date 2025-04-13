@@ -1,20 +1,25 @@
-app.controller("DatatableController", async ($scope) => {
+app.controller("DatatableController", function ($scope) {
 
     $scope.sorting = " ORDER BY id ASC"; // default
 
     // Proprietà per la paginazione
     $scope.rows_per_page = 5; // default
     $scope.current_page = 1;
-    //total_rows;
-    //total_pages;
 
     // Raccoglimento dei nomi delle città
-    await fetch("fetch_citynames.php").then(async (response) => {
+    fetch("database/fetch_citynames.php").then(async (response) => {
         $scope.cityNames = await response.json();
-    })
+        $scope.$apply();
+    });
+
+    $scope.submitSearch = () => {
+        $scope.current_page = 1;
+        $scope.updateTable();
+    }
 
     // Prende e mostra a schermo la tabella dei nominativi ordinata
     $scope.updateTable = async () => {
+
         const searchParams = {
             nome: $scope.nome,
             cognome: $scope.cognome,
@@ -23,7 +28,7 @@ app.controller("DatatableController", async ($scope) => {
             email: $scope.email
         };
 
-        await fetch("fetch_nom.php", {
+        await fetch("database/fetch_nom.php", {
             "method": "POST",
             "headers": {
                 "Content-Type": "application/json;"
@@ -36,7 +41,9 @@ app.controller("DatatableController", async ($scope) => {
                 $scope.tableRows = data[0];
                 $scope.total_rows = data[1];
             })
-        $scope.handlePagination();
+
+
+        await $scope.handlePagination();
 
         $scope.$apply();
     }
@@ -46,10 +53,54 @@ app.controller("DatatableController", async ($scope) => {
     // Funzioni per la paginazione
     $scope.handlePagination = () => {
         $scope.total_pages = Math.ceil($scope.total_rows / $scope.rows_per_page);
+
+        // Aggiornamento delle classi di ogni bottone nella paginazione
+        // Freccie ai lati << >>
+        $scope.paginationLeftArrowClass = $scope.current_page === 1 ? 'disabled' : '';
+        $scope.paginationRightArrowClass = $scope.current_page >= $scope.total_pages ? 'disabled' : '';
+
+        // Prima e ultima pagina
+        $scope.paginationPageOneClass = $scope.current_page === 1 ? 'active' : '';
+        $scope.paginationLastPageClass = $scope.total_pages <= 1 ? 'd-none' : ($scope.current_page === $scope.total_pages ? 'active' : '');
+
+        // Precedente e prossima pagina
+        $scope.paginationPreviousPageClass = $scope.current_page - 1 < 2 ? 'd-none' : '';
+        $scope.paginationNextPageClass = $scope.current_page + 1 >= $scope.total_pages ? 'd-none' : '';
+
+        // I divider grigi (...)
+        $scope.paginationLeftDividerClass = $scope.current_page < 4 ? 'd-none' : '';
+        $scope.paginationRightDividerClass = $scope.current_page + 2 >= $scope.total_pages ? 'd-none' : '';
+
+        // Pagina attuale
+        $scope.paginationCurrentPageClass = [1, $scope.total_pages].includes($scope.current_page) ? 'd-none' : 'active';
+    }
+
+    $scope.firstPage = () => {
+        $scope.current_page = 1;
+        $scope.updateTable();
+    }
+
+    $scope.lastPage = () => {
+        $scope.current_page = $scope.total_pages;
+        $scope.updateTable();
+    }
+
+    $scope.prevPage = () => {
+        if ($scope.current_page >= 2) {
+            $scope.current_page = $scope.current_page - 1;
+            $scope.updateTable();
+        }
+    }
+
+    $scope.nextPage = () => {
+        if ($scope.current_page !== $scope.total_pages) {
+            $scope.current_page = $scope.current_page + 1;
+            $scope.updateTable();
+        }
     }
 
     $scope.updateRowAmount = () => {
-        const newAmount = (document.getElementById("rows_per_page")).value;
+        const newAmount = document.getElementById("rows_per_page").value;
 
         if (newAmount && $scope.rows_per_page !== newAmount) {
             $scope.rows_per_page = newAmount;
@@ -58,7 +109,7 @@ app.controller("DatatableController", async ($scope) => {
         }
     }
 
-    // Quando viene cliccata una colonna, this.sorting viene aggiornato per riflettere il cambiamento
+    // Quando viene cliccata una colonna, $scope.sorting viene aggiornato per riflettere il cambiamento
     $scope.sort = (column) => {
         if ($scope.sorting.includes(` ${column}`)) {
 
@@ -74,12 +125,13 @@ app.controller("DatatableController", async ($scope) => {
 
     // Domanda di conferma e cancellazione record
     $scope.promptDelete = (id) => {
-        if (confirm(`Sei sicuro di voler eliminare il record con id ${id}?`))
+        if (confirm(`Sei sicuro di voler eliminare il record con id ${id}?`)) {
             $scope.dbDelete(id);
+        }
     }
 
     $scope.dbDelete = async (id) => {
-        await fetch("delete_user.php", {
+        await fetch("database/delete_user.php", {
             "method": "POST",
             "headers": {
                 "Content-Type": "application/json;"
@@ -92,17 +144,13 @@ app.controller("DatatableController", async ($scope) => {
 
     // Mostra età dell'utente quando si clicca una colonna
     $scope.showAge = (data_nascita) => {
-        data_nascita = moment(data_nascita);
-        const now = moment();
-
-        const age = now.diff(data_nascita, "year");
+        const age = moment().diff(moment(data_nascita), "year");
         alert(`Questo utente ha ${age} anni.`);
     }
 
     // Funzioni della switch CitySwitch
     $scope.updateSwitchSelection = () => {
-        const elem = document.getElementById("CitySwitch");
-        $scope.citySwitch = elem.checked;
+        $scope.citySwitch = document.getElementById("CitySwitch").checked;
     }
 
     $scope.findMatchingCityName = (id_citta) => {
@@ -112,6 +160,3 @@ app.controller("DatatableController", async ($scope) => {
         }
     }
 });
-
-//ng-repeat="person in people"
-//ng-class="{red: isRed == true}" (gives red class if $scope.isRed is true)

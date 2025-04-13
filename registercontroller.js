@@ -1,25 +1,28 @@
-app.controller("RegisterController", async ($scope) => {
+app.controller("RegisterController", function ($scope) {
     const resultText = document.getElementById("result-text");
 
     // Raccoglimento dei nomi delle città
-    fetch("fetch_citynames.php").then(async (response) => {
-      $scope.cityNames = await response.json();
+    fetch("database/fetch_citynames.php").then(async (response) => {
+        $scope.cityNames = await response.json();
+        $scope.$apply();
     })
 
-    
+
     $scope.submitHandler = () => {
+        console.log("submitHandler attivato");
         // Se ci sono campi vuoti dai errore
         if (!($scope.nome?.trim() && $scope.cognome?.trim() && $scope.data_nascita && $scope.id_citta?.trim() && $scope.email?.trim())) {
             $scope.showAlert({ text: "Non hai inserito tutte le informazioni.", type: "danger" });
             return;
         }
-
+        console.log("Prima della validazione");
         // Validazione email
         if (!$scope.email?.includes("@") || !$scope.email?.includes(".")) {
             $scope.showAlert({ text: "Inserisci una email valida.", type: "danger" });
             return;
         }
 
+        console.log("Prima della creazione dell'inputUser");
         const inputUser = {
             nome: $scope.nome,
             cognome: $scope.cognome,
@@ -27,9 +30,10 @@ app.controller("RegisterController", async ($scope) => {
             id_citta: $scope.id_citta,
             email: $scope.email
         }
-
+        console.log("Dopo la creazione dell'inputUser");
+        
         // Richiesta POST per aggiungere l'utente al database
-        fetch("add-user.php", {
+        fetch("database/add-user.php", {
             "method": "POST",
             "headers": {
                 "Content-Type": "application/json;"
@@ -38,6 +42,7 @@ app.controller("RegisterController", async ($scope) => {
         })
             .then(async (response) => {
                 const text = await response.text();
+                console.log(text);
 
                 if (Number(text) === 1) { // php ritorna solo "1" se è andato bene, altrimenti ritorna un messaggio di errore
                     $scope.showAlert({ text: "Utente aggiunto con successo!", type: "success" });
@@ -73,6 +78,3 @@ app.controller("RegisterController", async ($scope) => {
         resultText.innerText = "";
     }
 });
-
-//ng-repeat="person in people"
-//ng-class="{red: isRed == true}" (gives red class if $scope.isRed is true)

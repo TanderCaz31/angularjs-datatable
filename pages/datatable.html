@@ -1,0 +1,185 @@
+<!-- Menù di ricerca -->
+<div ng-app="AngularJSDatatable" ng-controller="DatatableController">
+    <form class="p-3" ng-submit="submitSearch()">
+        <fieldset>
+            <legend>Ricerca per singolo parametro</legend>
+
+            <div class="row g-3 mb-2">
+                <div class="col-md-4">
+                    <label>Nome</label><br>
+                    <input class="form-control" placeholder="Giona" ng-model="nome">
+                </div>
+
+                <div class="col-md-4">
+                    <label>Cognome</label><br>
+                    <input class="form-control" placeholder="Coppola" ng-model="cognome">
+                </div>
+
+                <div class="col-md-4">
+                    <label>Data di nascita</label><br>
+                    <input type="date" class="form-control" ng-model="data_nascita">
+                </div>
+            </div>
+
+            <div class="row g-3 mb-2">
+                <div class="col-md-4">
+                    <label>Nome città</label><br>
+                    <select class="form-select" ng-model="id_citta">
+                        <option></option>
+                        <option value="{{ city.id }}" ng-repeat="city in cityNames">{{ city.nome }} </option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label>Email</label><br>
+                    <input class="form-control" placeholder="email@gmail.com" ng-model="email">
+                </div>
+            </div>
+
+            <div class="form-check form-switch px-5">
+                <input class="form-check-input" type="checkbox" id="CitySwitch" ng-click="updateSwitchSelection()">
+                <label class="form-check-label">Nomi Città / ID Città</label>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Ricerca</button>
+        </fieldset>
+    </form>
+
+    <!-- Tabella -->
+    <div class="container-fluid p-5">
+        <table class="table table-hover table-striped table-bordered">
+            <thead>
+                <tr class="d-flex">
+                    <th class="col-2">Cancellazione record</th>
+                    <th class="col-1" ng-click="sort('id')">id
+                        <!-- Freccia sorting id -->
+                        <svg ng-class="sorting.substring(10, 13) === 'id ' ? '' : 'd-none'"
+                            ng-attr-transform="{{ sorting.slice(-3) === 'ASC' ? '' : 'scale(1 -1)' }}"
+                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                            <polygon
+                                points="13 17.586 13 4 11 4 11 17.586 4.707 11.293 3.293 12.707 12 21.414 20.707 12.707 19.293 11.293 13 17.586" />
+                        </svg>
+                    </th>
+                    <th class="col-2" ng-click="sort('nome')">nome
+                        <!-- Freccia sorting nome -->
+                        <svg ng-class="sorting.substring(10, 13) === 'nom' ? '' : 'd-none'"
+                            ng-attr-transform="{{ sorting.slice(-3) === 'ASC' ? '' : 'scale(1 -1)' }}"
+                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                            <polygon
+                                points="13 17.586 13 4 11 4 11 17.586 4.707 11.293 3.293 12.707 12 21.414 20.707 12.707 19.293 11.293 13 17.586" />
+                        </svg>
+                    </th>
+                    <th class="col-2" ng-click="sort('cognome')">cognome
+                        <!-- Freccia sorting cognome -->
+                        <svg ng-class="sorting.substring(10, 13) === 'cog' ? '' : 'd-none'"
+                            ng-attr-transform="{{ sorting.slice(-3) === 'ASC' ? '' : 'scale(1 -1)' }}"
+                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                            <polygon
+                                points="13 17.586 13 4 11 4 11 17.586 4.707 11.293 3.293 12.707 12 21.414 20.707 12.707 19.293 11.293 13 17.586" />
+                        </svg>
+                    </th>
+                    <th class="col-2" ng-click="sort('data_nascita')">data nascita
+                        <!-- Freccia sorting data_nascita -->
+                        <svg ng-class="sorting.substring(10, 13) === 'dat' ? '' : 'd-none'"
+                            ng-attr-transform="{{ sorting.slice(-3) === 'ASC' ? '' : 'scale(1 -1)' }}" id="id"
+                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                            <polygon
+                                points="13 17.586 13 4 11 4 11 17.586 4.707 11.293 3.293 12.707 12 21.414 20.707 12.707 19.293 11.293 13 17.586" />
+                        </svg>
+                    </th>
+                    <th class="col-1" ng-click="sort('id_citta')">{{ citySwitch ? "id città" : "nome città" }}
+                        <!-- Freccia sorting id_citta -->
+                        <svg ng-class="sorting.substring(10, 13) === 'id_' ? '' : 'd-none'"
+                            ng-attr-transform="{{ sorting.slice(-3) === 'ASC' ? '' : 'scale(1 -1)' }}" id="id"
+                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                            <polygon
+                                points="13 17.586 13 4 11 4 11 17.586 4.707 11.293 3.293 12.707 12 21.414 20.707 12.707 19.293 11.293 13 17.586" />
+                        </svg>
+                    </th>
+                    <th class="col-2" ng-click="sort('email')">email
+                        <!-- Freccia sorting email -->
+                        <svg ng-class="sorting.substring(10, 13) === 'ema' ? '' : 'd-none'"
+                            ng-attr-transform="{{ sorting.slice(-3) === 'ASC' ? '' : 'scale(1 -1)' }}" id="id"
+                            xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                            <polygon
+                                points="13 17.586 13 4 11 4 11 17.586 4.707 11.293 3.293 12.707 12 21.414 20.707 12.707 19.293 11.293 13 17.586" />
+                        </svg>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="d-flex" ng-repeat="row in tableRows">
+                    <td class="col-2">
+                        <button ng-click="promptDelete(row.id)" type="button"
+                            class="btn btn-danger">Rimuovi</button>
+                    </td>
+                    <th class="col-1">{{ row.id }}</th>
+                    <td class="col-2">{{ row.nome }}</td>
+                    <td class="col-2">{{ row.cognome }}</td>
+                    <td class="col-2" ng-click="showAge(row.data_nascita)">{{ row.data_nascita }}</td>
+                    <td class="col-1">{{ citySwitch ? row.id_citta : findMatchingCityName(row.id_citta) }}</td>
+                    <td class="col-2">{{ row.email }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div>
+            <ul class="pagination pagination-sm">
+                <!-- Doppie freccie "Indietro di uno" -->
+                <li class="page-item" ng-class="paginationLeftArrowClass">
+                    <a class="page-link" ng-click="prevPage()">&laquo;</a>
+                </li>
+                <!-- Bottone "Pagina 1" -->
+                <li class="page-item" ng-class="paginationPageOneClass">
+                    <a class="page-link" ng-click="firstPage()">1</a>
+                </li>
+
+                <!-- Divider "Pagina 1 è lontana" -->
+                <li class="page-item" ng-class="paginationLeftDividerClass">
+                    <a class="page-link disabled">...</a>
+                </li>
+                <!-- Bottone "Pagina precedente" -->
+                <li class="page-item" ng-class="paginationPreviousPageClass">
+                    <a class="page-link" ng-click="prevPage()">
+                        {{ current_page - 1 }}
+                    </a>
+                </li>
+                <!-- Bottone "Pagina attuale" -->
+                <li class="page-item" ng-class="paginationCurrentPageClass">
+                    <a class="page-link">{{ current_page }}</a>
+                </li>
+                <!-- Bottone "Prossima pagina" -->
+                <li class="page-item" ng-class="paginationNextPageClass">
+                    <a class="page-link" ng-click="nextPage()">
+                        {{ current_page + 1 }}
+                    </a>
+                </li>
+                <!-- Divider "L'ultima pagina è lontata" -->
+                <li class="page-item" ng-class="paginationRightDividerClass">
+                    <a class="page-link disabled">...</a>
+                </li>
+
+                <!-- Bottone "ultima pagina" -->
+                <li class="page-item" ng-class="paginationLastPageClass">
+                    <a class="page-link" ng-click="lastPage()">{{ total_pages }}</a>
+                </li>
+                <!-- Doppia freccia "Avanti di uno" -->
+                <li class="page-item" ng-class="paginationRightArrowClass">
+                    <a class="page-link" ng-click="nextPage()">&raquo;</a>
+                </li>
+            </ul>
+            Righe: {{ rows_per_page * (current_page-1) + 1 }}-{{ rows_per_page * (current_page) }} su {{ total_rows
+            }}
+
+            <div class="mb-3">
+                Mostrate per pagina:
+                <select name="rows_per_page" id="rows_per_page" ng-click="updateRowAmount()">
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="15">15</option>
+                    <option value="25">25</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
